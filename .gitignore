@@ -1,7 +1,7 @@
-# Dependencies
+# Frontend Dependencies
 node_modules/
 
-# Build and output directories
+# Frontend Build and output directories
 dist/
 dist-ssr/
 
@@ -10,7 +10,7 @@ dist-ssr/
 .env
 .env.*
 
-# Logs
+# Log files
 logs/
 *.log
 npm-debug.log*
@@ -19,15 +19,55 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Editor and IDE files
+# Java/Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# IDE files
+## VS Code
 .vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 !.vscode/extensions.json
+*.code-workspace
+.history/
+
+## IntelliJ IDEA
 .idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+## Eclipse
+.metadata
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+
+## NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
 # OS generated files
 .DS_Store
@@ -35,4 +75,17 @@ lerna-debug.log*
 ._*
 .Spotlight-V100
 .Trashes
+ehthumbs.db
 Thumbs.db
+
+# Misc
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*

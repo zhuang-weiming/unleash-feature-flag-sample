@@ -16,9 +16,26 @@ unleash.on('ready', () => {
     const statusDiv = document.getElementById('feature-status');
     console.log('Feature enabled:', enabled);
     if (enabled) {
-      statusDiv.textContent = '新功能已启用！';
+      statusDiv.textContent = '前端检查：\n新功能已启用！';
     } else {
-      statusDiv.textContent = '回退到旧逻辑';
+      statusDiv.textContent = '前端检查：\n回退到旧逻辑';
+    }
+  });
+
+  document.getElementById('check-backend-feature').addEventListener('click', async () => {
+    const statusDiv = document.getElementById('feature-status');
+    try {
+      const response = await fetch('http://localhost:8080/api/feature-check');
+      const enabled = await response.json();
+      console.log('Backend feature enabled:', enabled);
+      if (enabled) {
+        statusDiv.textContent = '后端检查：\n新功能已启用！';
+      } else {
+        statusDiv.textContent = '后端检查：\n回退到旧逻辑';
+      }
+    } catch (error) {
+      console.error('Backend API error:', error);
+      statusDiv.textContent = '后端API调用失败，请检查后端服务是否启动';
     }
   });
 });
