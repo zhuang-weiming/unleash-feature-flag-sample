@@ -42,6 +42,7 @@
 
 ### 1. 准备工作
 
+安装 https://github.com/Unleash/unleash
 在 Unleash 后台 (http://localhost:4242) 创建 feature flag：
 - 名称：`frontend-example-hello-world`
 - 确保已启用（Enabled）
