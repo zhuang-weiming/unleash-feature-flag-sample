@@ -97,6 +97,62 @@ document.getElementById('myButton').addEventListener('click', () => {
    - 不要在客户端存储敏感的功能开关
    - 使用适当的 API 密钥和权限控制
 
+5. **缓存实现**
+   ```javascript
+   class FeatureFlagCache {
+     constructor(ttlMinutes = 1) {
+       this.cache = new Map();
+       this.ttlMillis = ttlMinutes * 60 * 1000;
+     }
+   
+     set(key, value) {
+       this.cache.set(key, {
+         value,
+         timestamp: Date.now()
+       });
+     }
+   
+     get(key) {
+       const entry = this.cache.get(key);
+       if (!entry) return null;
+       
+       if (Date.now() - entry.timestamp > this.ttlMillis) {
+         this.cache.delete(key);
+         return null;
+       }
+       
+       return entry.value;
+     }
+   }
+   
+   // 使用缓存
+   const featureCache = new FeatureFlagCache(1); // 1分钟TTL
+   ```
+
+6. **缓存使用示例**
+   ```javascript
+   // 检查功能开关状态
+   const checkFeature = (featureName) => {
+     // 首先检查缓存
+     const cachedValue = featureCache.get(featureName);
+     if (cachedValue !== null) {
+       console.log('Using cached value');
+       return cachedValue;
+     }
+     
+     // 缓存未命中时检查Unleash
+     const enabled = unleash.isEnabled(featureName);
+     featureCache.set(featureName, enabled);
+     return enabled;
+   };
+   ```
+
+7. **缓存注意事项**
+   - 默认缓存时间为1分钟
+   - 缓存自动过期和清理
+   - 减少对Unleash服务器的请求
+   - 提高应用性能和响应速度
+
 ## 常见问题解决
 
 1. **功能开关不生效**

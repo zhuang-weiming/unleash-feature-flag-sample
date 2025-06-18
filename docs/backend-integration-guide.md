@@ -158,6 +158,84 @@ unleash.environment=development
    }
    ```
 
+4. **缓存实现**
+   ```java
+   @Service
+   public class FeatureFlagCache {
+       private final Map<String, CacheEntry> cache;
+       private final long ttlMillis;
+   
+       public FeatureFlagCache() {
+           this.cache = new ConcurrentHashMap<>();
+           this.ttlMillis = 60000; // 1分钟TTL
+       }
+   
+       public void set(String key, boolean value) {
+           cache.put(key, new CacheEntry(value));
+       }
+   
+       public Boolean get(String key) {
+           CacheEntry entry = cache.get(key);
+           if (entry == null) return null;
+   
+           if (System.currentTimeMillis() - entry.timestamp > ttlMillis) {
+               cache.remove(key);
+               return null;
+           }
+   
+           return entry.value;
+       }
+   
+       private static class CacheEntry {
+           final boolean value;
+           final long timestamp;
+   
+           CacheEntry(boolean value) {
+               this.value = value;
+               this.timestamp = System.currentTimeMillis();
+           }
+       }
+   }
+   ```
+
+5. **在控制器中使用缓存**
+   ```java
+   @RestController
+   @RequestMapping("/api")
+   public class FeatureController {
+       private final Unleash unleash;
+       private final FeatureFlagCache cache;
+   
+       public FeatureController(Unleash unleash, FeatureFlagCache cache) {
+           this.unleash = unleash;
+           this.cache = cache;
+       }
+   
+       @GetMapping("/feature-check")
+       public boolean checkFeature() {
+           String featureName = "your-feature-name";
+           
+           // 首先检查缓存
+           Boolean cachedValue = cache.get(featureName);
+           if (cachedValue != null) {
+               return cachedValue;
+           }
+   
+           // 缓存未命中时检查Unleash
+           boolean isEnabled = unleash.isEnabled(featureName);
+           cache.set(featureName, isEnabled);
+           return isEnabled;
+       }
+   }
+   ```
+
+6. **缓存注意事项**
+   - 使用线程安全的 ConcurrentHashMap
+   - 自动过期机制
+   - 减少对 Unleash 服务器的请求
+   - 提高API响应速度
+   - 默认1分钟缓存时间
+
 ## 高级用法
 
 1. **使用上下文**
