@@ -1,103 +1,110 @@
 # Frontend Integration Guide for Unleash
 
-本指南将帮助你在前端项目中集成 Unleash 功能开关系统。这个指南基于我们的[示例项目](../README.md)中的实际实现。
+This guide will help you integrate the Unleash feature flag system in your frontend project. The guide is based on the actual implementation in our [example project](../README.md).
 
-> 你可以在以下文件中找到完整的前端实现：
-> - [src/main.js](../src/main.js) - Unleash 客户端集成和功能开关逻辑
-> - [index.html](../index.html) - 页面结构和按钮定义
-> - [src/style.css](../src/style.css) - 样式定义
-> - [package.json](../package.json) - 项目依赖配置
+> You can find the complete frontend implementation in the following files:
+>
+> - [src/main.js](../src/main.js) - Unleash client integration and feature flag logic
+> - [index.html](../index.html) - Page structure and button definitions
+> - [src/style.css](../src/style.css) - Style definitions
+> - [package.json](../package.json) - Project dependency configuration
 
-## 前置条件
+## Prerequisites
 
 - Node.js 18+
-- npm 或 yarn
-- 运行中的 Unleash 服务器 (http://localhost:4242)
+- npm or yarn
+- Running Unleash server at `http://localhost:4242`
 
-## 步骤 1: 安装依赖
+## Step 1: Install Dependencies
 
 ```bash
 npm install unleash-proxy-client
 ```
 
-## 步骤 2: 配置 Unleash 客户端
+## Step 2: Configure Unleash Client
 
-在你的前端代码中（参考 [main.js](../src/main.js) 的实现）：
+In your frontend code (refer to [main.js](../src/main.js) implementation):
 
 ```javascript
 import { UnleashClient } from 'unleash-proxy-client';
 
 const unleash = new UnleashClient({
-  url: 'http://localhost:4242/api/frontend',  // Unleash 服务器地址
-  clientKey: 'default:development.unleash-insecure-frontend-api-token',  // API密钥
-  appName: 'default',  // 应用名称
+  url: 'http://localhost:4242/api/frontend',  // Unleash server address
+  clientKey: 'default:development.unleash-insecure-frontend-api-token',  // API key
+  appName: 'default',  // Application name
 });
 
-// 启动 Unleash 客户端
+// Start Unleash client
 unleash.start();
 ```
 
-## 步骤 3: 实现功能开关检查
+## Step 3: Implement Feature Toggle Check
 
 ```javascript
 unleash.on('ready', () => {
-  // Unleash 客户端就绪后的处理
+  // Handle after Unleash client is ready
   const checkFeature = () => {
     const featureName = 'your-feature-name';
     const isEnabled = unleash.isEnabled(featureName);
     
     if (isEnabled) {
-      // 功能开启时的逻辑
+      // Logic when feature is enabled
       console.log('Feature is enabled!');
     } else {
-      // 功能关闭时的逻辑
+      // Logic when feature is disabled
       console.log('Feature is disabled!');
     }
   };
 });
 
-// 错误处理
+// Error handling
 unleash.on('error', (error) => {
   console.error('Unleash error:', error);
 });
 ```
 
-## 步骤 4: 在 UI 中使用功能开关
+## Step 4: Use Feature Toggle in UI
 
 ```javascript
 document.getElementById('myButton').addEventListener('click', () => {
   if (unleash.isEnabled('my-feature')) {
-    // 显示新功能
+    // Show new feature
     showNewFeature();
   } else {
-    // 显示默认功能
+    // Show default feature
     showDefaultFeature();
   }
 });
 ```
 
-## 最佳实践
+## Best Practices
 
-1. **错误处理**
-   - 始终添加错误监听器
-   - 为功能开关检查添加默认值
+1. **Error Handling**
+
+   - Always add error listeners
+   - Add default values for feature toggle checks
+
    ```javascript
    unleash.isEnabled('my-feature', { fallback: false })
    ```
 
-2. **性能优化**
-   - 避免频繁检查同一个功能开关
-   - 考虑将检查结果缓存在本地变量中
+2. **Performance Optimization**
 
-3. **开发调试**
-   - 使用浏览器控制台监控功能开关状态
-   - 添加适当的日志输出
+   - Avoid frequent checks of the same feature toggle
+   - Consider caching check results in local variables
 
-4. **安全性**
-   - 不要在客户端存储敏感的功能开关
-   - 使用适当的 API 密钥和权限控制
+3. **Development Debugging**
 
-5. **缓存实现**
+   - Use browser console to monitor feature toggle status
+   - Add appropriate logging
+
+4. **Security**
+
+   - Don't store sensitive feature toggles on the client side
+   - Use appropriate API keys and permission controls
+
+5. **Cache Implementation**
+
    ```javascript
    class FeatureFlagCache {
      constructor(ttlMinutes = 1) {
@@ -125,122 +132,129 @@ document.getElementById('myButton').addEventListener('click', () => {
      }
    }
    
-   // 使用缓存
-   const featureCache = new FeatureFlagCache(1); // 1分钟TTL
+   // Using cache
+   const featureCache = new FeatureFlagCache(1); // 1 minute TTL
    ```
 
-6. **缓存使用示例**
+6. **Cache Usage Example**
+
    ```javascript
-   // 检查功能开关状态
+   // Check feature toggle status
    const checkFeature = (featureName) => {
-     // 首先检查缓存
+     // Check cache first
      const cachedValue = featureCache.get(featureName);
      if (cachedValue !== null) {
        console.log('Using cached value');
        return cachedValue;
      }
      
-     // 缓存未命中时检查Unleash
+     // Check Unleash when cache miss
      const enabled = unleash.isEnabled(featureName);
      featureCache.set(featureName, enabled);
      return enabled;
    };
    ```
 
-7. **缓存注意事项**
-   - 默认缓存时间为1分钟
-   - 缓存自动过期和清理
-   - 减少对Unleash服务器的请求
-   - 提高应用性能和响应速度
+7. **Cache Considerations**
 
-## 常见问题解决
+   - Default cache time is 1 minute
+   - Automatic cache expiration and cleanup
+   - Reduce requests to Unleash server
+   - Improve application performance and response speed
 
-1. **功能开关不生效**
-   - 检查 Unleash 服务器连接状态
-   - 验证功能开关名称是否正确
-   - 确认 API 密钥是否有效
+## Common Issues
 
-2. **连接错误**
-   - 验证 Unleash 服务器地址
-   - 检查网络连接
-   - 确认 CORS 配置是否正确
+1. **Feature Toggle Not Working**
 
-3. **环境配置**
-   - 使用环境变量管理配置
-   - 区分开发和生产环境
+   - Check Unleash server connection status
+   - Verify feature toggle names are correct
+   - Confirm API key is valid
 
-## 示例代码
+2. **Connection Issues**
 
-完整的功能开关集成示例：
+   - Verify Unleash server address
+   - Check network connection
+   - Confirm CORS configuration is correct
+
+3. **Environment Configuration**
+
+   - Use environment variables for configuration management
+   - Differentiate between development and production environments
+
+## Example Code
+
+Complete feature toggle integration example:
 
 ```javascript
 import { UnleashClient } from 'unleash-proxy-client';
 
-// 初始化 Unleash 客户端
+// Initialize Unleash client
 const unleash = new UnleashClient({
   url: process.env.UNLEASH_API_URL || 'http://localhost:4242/api/frontend',
   clientKey: process.env.UNLEASH_API_KEY || 'default:development.unleash-insecure-frontend-api-token',
   appName: 'my-app',
 });
 
-// 启动客户端
+// Start client
 unleash.start();
 
-// 监听就绪事件
+// Listen for ready event
 unleash.on('ready', () => {
   console.log('Unleash client is ready');
   
-  // 设置功能开关检查
+  // Set up feature toggle checks
   const featureButtons = document.querySelectorAll('[data-feature]');
   featureButtons.forEach(button => {
     const featureName = button.dataset.feature;
     button.addEventListener('click', () => {
       if (unleash.isEnabled(featureName)) {
         console.log(`Feature ${featureName} is enabled`);
-        // 实现新功能
+        // Implement new feature
       } else {
         console.log(`Feature ${featureName} is disabled`);
-        // 实现后备功能
+        // Implement fallback feature
       }
     });
   });
 });
 
-// 错误处理
+// Error handling
 unleash.on('error', (error) => {
   console.error('Unleash client error:', error);
-  // 实现适当的错误处理
+  // Implement appropriate error handling
 });
 
-// 优雅关闭
+// Graceful shutdown
 window.addEventListener('unload', () => {
   unleash.stop();
 });
 ```
 
-## 测试
+## Testing
 
-1. **单元测试**
-```javascript
-// 使用 jest 进行测试
-describe('Feature Toggle Tests', () => {
-  it('should handle enabled feature', () => {
-    const isEnabled = unleash.isEnabled('test-feature');
-    expect(isEnabled).toBeDefined();
-  });
-});
-```
+1. **Unit Testing**
 
-2. **集成测试**
-- 测试功能开关的不同状态
-- 测试错误处理
-- 测试默认值行为
+   ```javascript
+   // Using jest for testing
+   describe('Feature Toggle Tests', () => {
+     it('should handle enabled feature', () => {
+       const isEnabled = unleash.isEnabled('test-feature');
+       expect(isEnabled).toBeDefined();
+     });
+   });
+   ```
 
-## 部署检查清单
+2. **Integration Testing**
 
-- [ ] 确认所有功能开关名称正确
-- [ ] 验证 API 密钥配置
-- [ ] 测试错误处理
-- [ ] 检查日志输出
-- [ ] 验证性能影响
-- [ ] 确认 CORS 配置
+   - Test different states of feature toggles
+   - Test error handling
+   - Test default value behavior
+
+## Deployment Checklist
+
+- [ ] Confirm all feature toggle names are correct
+- [ ] Verify API key configuration
+- [ ] Test error handling
+- [ ] Check logging output
+- [ ] Verify performance impact
+- [ ] Confirm CORS configuration

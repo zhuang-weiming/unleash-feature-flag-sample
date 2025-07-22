@@ -1,157 +1,174 @@
 # Unleash Feature Flag Sample
 
-这是一个使用 Unleash Feature Flag 的完整示例项目，包含前端和后端集成示例。
+This is a complete example project using Unleash Feature Flag, including both frontend and backend integration examples.
 
-## 项目特性
+## Project Features
 
-- 完整的前后端功能开关集成
-- 高性能缓存实现（前端和后端）
-- 一致的缓存策略（1分钟 TTL）
-- 线程安全的后端缓存
-- 自动缓存失效机制
+- Complete frontend and backend feature toggle integration
+- High-performance cache implementation (frontend and backend)
+- Consistent caching strategy (1-minute TTL)
+- Thread-safe backend cache
+- Automatic cache invalidation mechanism
 
-## 项目概述
+## Project Overview
 
-本项目展示了如何在前端和后端同时集成 Unleash 功能开关（Feature Flag）系统：
-- 前端使用 `unleash-proxy-client` 直接与 Unleash 服务器通信
-- 后端使用 Java SDK 与 Unleash 服务器通信
-- 同时支持前端直接检查和通过后端 API 检查功能开关状态
+This project demonstrates how to integrate Unleash feature toggle (Feature Flag) system in both frontend and backend:
 
-## 前置条件
+- Frontend uses `unleash-proxy-client` to communicate directly with Unleash server
+- Backend uses Java SDK to communicate with Unleash server
+- Supports both direct frontend checks and feature toggle status checks via backend API
+
+## Prerequisites
 
 - Node.js 18+
 - Java 17+
 - Maven 3.8+
-- Unleash 服务运行在 http://localhost:4242
+- Unleash service running at `http://localhost:4242`
 
-## 项目结构
+## Project Structure
 
 ```
-├── frontend (根目录)
-│   ├── index.html          # 主页面
-│   ├── package.json        # 前端项目配置
+├── frontend (root directory)
+│   ├── index.html          # Main page
+│   ├── package.json        # Frontend project configuration
 │   └── src/
-│       ├── main.js        # 前端 Unleash 集成代码
-│       └── style.css      # 样式文件
+│       ├── main.js        # Frontend Unleash integration code
+│       └── style.css      # Style file
 │
 └── backend/
-    ├── pom.xml           # Maven 项目配置
+    ├── pom.xml           # Maven project configuration
     └── src/main/
-        ├── java/         # Java 源代码
-        └── resources/    # 配置文件
+        ├── java/         # Java source code
+        └── resources/    # Configuration files
 ```
 
-## 详细文档
+## Detailed Documentation
 
-- [前端集成指南](docs/frontend-integration-guide.md) - 前端功能开关集成详细说明
-- [后端集成指南](docs/backend-integration-guide.md) - Java 后端功能开关集成详细说明
+- [Frontend Integration Guide](docs/frontend-integration-guide.md) - Detailed guide for frontend feature toggle integration
+- [Backend Integration Guide](docs/backend-integration-guide.md) - Detailed guide for Java backend feature toggle integration
 
-## 快速开始
+## Quick Start
 
-### 1. 准备工作
+### 1. Preparation
 
-安装 https://github.com/Unleash/unleash
-在 Unleash 后台 (http://localhost:4242) 创建 feature flag：
-- 名称：`frontend-example-hello-world`
-- 确保已启用（Enabled）
+Install https://github.com/Unleash/unleash
+In the Unleash admin panel (http://localhost:4242)
 
-### 2. 启动前端服务
+Execute the following commands:
 
-1. 安装依赖:
+git clone git@github.com:Unleash/unleash.git
+cd unleash
+```
+docker compose up -d
+```
+Then point your browser to localhost:4242 and log in using:
+```
+username: admin
+password: unleash4all
+```
+Create a feature flag:
+- Name: `frontend-example-hello-world`
+- Ensure it's Enabled
+
+![admin-console-screenshot](admin-console-screenshot.png)
+
+### 2. Start Frontend Service
+
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. 启动开发服务器:
+2. Start development server:
 ```bash
 npm run dev
 ```
 
-3. 前端服务将运行在 http://localhost:5173
+3. Frontend service will run at http://localhost:5173
 
-### 3. 启动后端服务
+### 3. Start Backend Service
 
-1. 进入后端目录:
+1. Enter backend directory:
 ```bash
 cd backend
 ```
 
-2. 启动 Spring Boot 应用:
+2. Start Spring Boot application:
 ```bash
 mvn spring-boot:run
 ```
 
-3. 后端服务将运行在 http://localhost:8080
+3. Backend service will run at http://localhost:8080
 
-## 功能测试
+## Feature Testing
 
-1. 打开浏览器访问 http://localhost:5173
+1. Open browser and visit http://localhost:5173
 
-2. 界面上有两个按钮：
-   - "Check Frontend Feature": 直接通过前端 SDK 检查功能开关
-   - "Check Backend Feature": 通过后端 API 检查功能开关
+2. There are two buttons on the interface:
+   - "Check Frontend Feature": Check feature toggle status directly through frontend SDK
+   - "Check Backend Feature": Check feature toggle status through backend API
 
-3. 测试场景：
-   - 点击前端检查按钮：直接从 Unleash 获取功能开关状态
-   - 点击后端检查按钮：通过后端 API 获取功能开关状态
-   - 在 Unleash 管理界面修改功能开关状态，然后测试两个按钮的响应
+3. Test scenarios:
+   - Click frontend check button: Get feature toggle status directly from Unleash
+   - Click backend check button: Get feature toggle status via backend API
+   - Modify feature toggle status in Unleash admin interface, then test both buttons' responses
 
-4. 功能开关状态显示：
-   - 启用时显示："新功能已启用！"
-   - 禁用时显示："回退到旧逻辑"
-   - 后端服务未启动时显示相应错误信息
+4. Feature toggle status display:
+   - When enabled: "New feature is enabled!"
+   - When disabled: "Fallback to old logic"
+   - When backend service is not running: Shows corresponding error message
 
-## API 接口
+## API Interface
 
-### 后端 API
+### Backend API
 
-- 功能开关检查接口
+- Feature toggle check endpoint
   - URL: `http://localhost:8080/api/feature-check`
-  - 方法: GET
-  - 返回: Boolean（true: 功能启用，false: 功能禁用）
+  - Method: GET
+  - Returns: Boolean (true: feature enabled, false: feature disabled)
 
-## 技术栈
+## Tech Stack
 
-### 前端
+### Frontend
 - Vite
 - unleash-proxy-client
 
-### 后端
+### Backend
 - Spring Boot 3.1
 - unleash-client-java 8.0
 
-## 性能优化
+## Performance Optimization
 
-### 缓存机制
-本项目在前端和后端都实现了feature flag缓存机制，以提高性能和减少对Unleash服务器的请求：
+### Caching Mechanism
+This project implements feature flag caching mechanisms in both frontend and backend to improve performance and reduce requests to the Unleash server:
 
-1. **前端缓存**
-   - 使用 Map 实现的内存缓存
-   - 1分钟缓存时间
-   - 自动过期和清理
-   - 分离的前端和后端API缓存
+1. **Frontend Cache**
+   - Memory cache implemented using Map
+   - 1-minute cache time
+   - Automatic expiration and cleanup
+   - Separate frontend and backend API caches
 
-2. **后端缓存**
-   - 使用 ConcurrentHashMap 实现的线程安全缓存
-   - 1分钟缓存时间
-   - 自动过期机制
-   - Spring Bean 生命周期管理
+2. **Backend Cache**
+   - Thread-safe cache implemented using ConcurrentHashMap
+   - 1-minute cache time
+   - Automatic expiration mechanism
+   - Spring Bean lifecycle management
 
-### 性能提升
-- 减少对 Unleash 服务器的请求
-- 提高API响应速度
-- 降低服务器负载
-- 改善用户体验
+### Performance Improvements
+- Reduced requests to Unleash server
+- Improved API response speed
+- Reduced server load
+- Enhanced user experience
 
-## 开发建议
+## Development Tips
 
-1. 确保 Unleash 服务器正常运行
-2. 前端和后端使用相同的功能开关名称
-3. 正确配置 CORS 以允许前端访问后端 API
-4. 使用适当的环境变量管理配置
+1. Ensure Unleash server is running properly
+2. Use the same feature toggle names in frontend and backend
+3. Configure CORS correctly to allow frontend access to backend API
+4. Use appropriate environment variables for configuration management
 
-## 常见问题
+## Common Issues
 
-1. 后端 API 404：检查后端服务是否正常启动
-2. 功能开关不生效：检查 Unleash 服务器连接和功能开关配置
-3. CORS 错误：检查后端 CORS 配置是否正确
+1. Backend API 404: Check if backend service is running properly
+2. Feature toggle not working: Check Unleash server connection and feature toggle configuration
+3. CORS error: Check backend CORS configuration

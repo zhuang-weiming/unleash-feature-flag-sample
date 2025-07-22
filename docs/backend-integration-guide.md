@@ -1,38 +1,40 @@
 # Backend Integration Guide for Unleash (Java/Spring Boot)
 
-本指南将帮助你在 Java Spring Boot 项目中集成 Unleash 功能开关系统。这个指南基于我们的[示例项目](../README.md)中的实际实现。
+This guide will help you integrate the Unleash feature toggle system in your Java Spring Boot project. The guide is based on the actual implementation in our [example project](../README.md).
 
-## 快速链接
+## Quick Links
 
-### 核心实现文件
-- [UnleashConfiguration.java](../backend/src/main/java/com/example/unleashsample/config/UnleashConfiguration.java) - Unleash 客户端配置
-- [FeatureController.java](../backend/src/main/java/com/example/unleashsample/controller/FeatureController.java) - 功能开关 API 实现
-- [UnleashApplication.java](../backend/src/main/java/com/example/unleashsample/UnleashApplication.java) - Spring Boot 应用入口
+### Core Implementation Files
 
-### 配置文件
-- [application.properties](../backend/src/main/resources/application.properties) - 应用配置
-- [pom.xml](../backend/pom.xml) - Maven 项目配置和依赖管理
+- [UnleashConfiguration.java](../backend/src/main/java/com/example/unleashsample/config/UnleashConfiguration.java) - Unleash client configuration
+- [FeatureController.java](../backend/src/main/java/com/example/unleashsample/controller/FeatureController.java) - Feature toggle API implementation
+- [UnleashApplication.java](../backend/src/main/java/com/example/unleashsample/UnleashApplication.java) - Spring Boot application entry point
 
-## 前置条件
+### Configuration Files
+
+- [application.properties](../backend/src/main/resources/application.properties) - Application configuration
+- [pom.xml](../backend/pom.xml) - Maven project configuration and dependency management
+
+## Prerequisites
 
 - Java 17+
 - Maven 3.8+
 - Spring Boot 3.x
-- 运行中的 Unleash 服务器 (http://localhost:4242)
+- Running Unleash server at `http://localhost:4242`
 
-## 步骤 1: 添加依赖
+## Step 1: Add Dependencies
 
-在 `pom.xml` 中添加 Unleash Java 客户端依赖：
+Add the Unleash Java client dependency to `pom.xml`:
 
 ```xml
 <dependencies>
-    <!-- Spring Boot 依赖 -->
+    <!-- Spring Boot dependencies -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     
-    <!-- Unleash 客户端依赖 -->
+    <!-- Unleash client dependency -->
     <dependency>
         <groupId>io.getunleash</groupId>
         <artifactId>unleash-client-java</artifactId>
@@ -41,9 +43,9 @@
 </dependencies>
 ```
 
-## 步骤 2: 配置 Unleash 客户端
+## Step 2: Configure Unleash Client
 
-创建 Unleash 配置类（参考 [UnleashConfiguration.java](../backend/src/main/java/com/example/unleashsample/config/UnleashConfiguration.java) 的实现）：
+Create the Unleash configuration class (refer to [UnleashConfiguration.java](../backend/src/main/java/com/example/unleashsample/config/UnleashConfiguration.java) implementation):
 
 ```java
 package com.example.yourapp.config;
@@ -72,9 +74,9 @@ public class UnleashConfiguration {
 }
 ```
 
-## 步骤 3: 创建功能开关控制器
+## Step 3: Create Feature Toggle Controller
 
-参考 [FeatureController.java](../backend/src/main/java/com/example/unleashsample/controller/FeatureController.java) 的实现：
+Refer to [FeatureController.java](../backend/src/main/java/com/example/unleashsample/controller/FeatureController.java) implementation:
 
 ```java
 package com.example.yourapp.controller;
@@ -99,24 +101,25 @@ public class FeatureController {
 }
 ```
 
-## 步骤 4: 配置应用属性
+## Step 4: Configure Application Properties
 
-在 `application.properties` 或 `application.yml` 中添加配置（参考 [application.properties](../backend/src/main/resources/application.properties) 的实现）：
+Add configuration to `application.properties` or `application.yml` (refer to [application.properties](../backend/src/main/resources/application.properties) implementation):
 
 ```properties
-# 服务器配置
+# Server configuration
 server.port=8080
 
-# 日志配置
+# Logging configuration
 logging.level.io.getunleash=DEBUG
 
-# Unleash 特定配置
+# Unleash specific configuration
 unleash.environment=development
 ```
 
-## 最佳实践
+## Best Practices
 
-1. **配置管理**
+1. **Configuration Management**
+
    ```java
    @Configuration
    @ConfigurationProperties(prefix = "unleash")
@@ -127,7 +130,8 @@ unleash.environment=development
    }
    ```
 
-2. **异常处理**
+2. **Exception Handling**
+
    ```java
    @ControllerAdvice
    public class UnleashExceptionHandler {
@@ -139,7 +143,8 @@ unleash.environment=development
    }
    ```
 
-3. **服务层封装**
+3. **Service Layer Encapsulation**
+
    ```java
    @Service
    public class FeatureService {
@@ -158,7 +163,8 @@ unleash.environment=development
    }
    ```
 
-4. **缓存实现**
+4. **Cache Implementation**
+
    ```java
    @Service
    public class FeatureFlagCache {
@@ -167,7 +173,7 @@ unleash.environment=development
    
        public FeatureFlagCache() {
            this.cache = new ConcurrentHashMap<>();
-           this.ttlMillis = 60000; // 1分钟TTL
+           this.ttlMillis = 60000; // 1 minute TTL
        }
    
        public void set(String key, boolean value) {
@@ -198,7 +204,8 @@ unleash.environment=development
    }
    ```
 
-5. **在控制器中使用缓存**
+5. **Using Cache in Controllers**
+
    ```java
    @RestController
    @RequestMapping("/api")
@@ -215,13 +222,13 @@ unleash.environment=development
        public boolean checkFeature() {
            String featureName = "your-feature-name";
            
-           // 首先检查缓存
+           // Check cache first
            Boolean cachedValue = cache.get(featureName);
            if (cachedValue != null) {
                return cachedValue;
            }
    
-           // 缓存未命中时检查Unleash
+           // Check Unleash when cache miss
            boolean isEnabled = unleash.isEnabled(featureName);
            cache.set(featureName, isEnabled);
            return isEnabled;
@@ -229,154 +236,168 @@ unleash.environment=development
    }
    ```
 
-6. **缓存注意事项**
-   - 使用线程安全的 ConcurrentHashMap
-   - 自动过期机制
-   - 减少对 Unleash 服务器的请求
-   - 提高API响应速度
-   - 默认1分钟缓存时间
+6. **Cache Considerations**
 
-## 高级用法
+   - Use thread-safe ConcurrentHashMap
+   - Automatic expiration mechanism
+   - Reduce requests to Unleash server
+   - Improve API response speed
+   - Default 1-minute cache time
 
-1. **使用上下文**
-```java
-UnleashContext context = UnleashContext.builder()
-    .userId(user.getId())
-    .sessionId(session.getId())
-    .remoteAddress(request.getRemoteAddr())
-    .addProperty("customField", "customValue")
-    .build();
+## Advanced Usage
 
-boolean enabled = unleash.isEnabled("my-feature", context);
-```
+1. **Using Context**
 
-2. **自定义策略**
-```java
-public class CustomStrategy implements Strategy {
-    @Override
-    public String getName() {
-        return "custom";
-    }
+   ```java
+   UnleashContext context = UnleashContext.builder()
+       .userId(user.getId())
+       .sessionId(session.getId())
+       .remoteAddress(request.getRemoteAddr())
+       .addProperty("customField", "customValue")
+       .build();
 
-    @Override
-    public boolean isEnabled(Map<String, String> parameters, UnleashContext context) {
-        // 实现自定义逻辑
-        return true;
-    }
-}
-```
+   boolean enabled = unleash.isEnabled("my-feature", context);
+   ```
 
-3. **变体支持**
-```java
-Variant variant = unleash.getVariant("my-feature");
-switch (variant.getName()) {
-    case "A":
-        // 实现 A 变体
-        break;
-    case "B":
-        // 实现 B 变体
-        break;
-    default:
-        // 默认实现
-}
-```
+2. **Custom Strategy**
 
-## 测试
+   ```java
+   public class CustomStrategy implements Strategy {
+       @Override
+       public String getName() {
+           return "custom";
+       }
 
-1. **单元测试**
-```java
-@SpringBootTest
-class FeatureControllerTest {
-    @MockBean
-    private Unleash unleash;
+       @Override
+       public boolean isEnabled(Map<String, String> parameters, UnleashContext context) {
+           // Implement custom logic
+           return true;
+       }
+   }
+   ```
 
-    @Autowired
-    private FeatureController controller;
+3. **Variant Support**
 
-    @Test
-    void testFeatureFlag() {
-        when(unleash.isEnabled("test-feature")).thenReturn(true);
-        assertTrue(controller.checkFeature("test-feature"));
-    }
-}
-```
+   ```java
+   Variant variant = unleash.getVariant("my-feature");
+   switch (variant.getName()) {
+       case "A":
+           // Implement variant A
+           break;
+       case "B":
+           // Implement variant B
+           break;
+       default:
+           // Default implementation
+   }
+   ```
 
-2. **集成测试**
-```java
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class FeatureIntegrationTest {
-    @Autowired
-    private TestRestTemplate restTemplate;
+## Testing
 
-    @Test
-    void testFeatureEndpoint() {
-        ResponseEntity<Boolean> response = restTemplate
-            .getForEntity("/api/feature/test-feature", Boolean.class);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-}
-```
+1. **Unit Testing**
 
-## 监控和度量
+   ```java
+   @SpringBootTest
+   class FeatureControllerTest {
+       @MockBean
+       private Unleash unleash;
 
-1. **添加度量收集**
-```java
-@Bean
-public UnleashMetricService unleashMetricService(Unleash unleash) {
-    return new UnleashMetricService(unleash);
-}
-```
+       @Autowired
+       private FeatureController controller;
 
-2. **自定义度量处理**
-```java
-public class CustomMetricSubscriber implements UnleashSubscriber {
-    @Override
-    public void onCount(String name, boolean enabled) {
-        // 实现度量收集逻辑
-    }
-}
-```
+       @Test
+       void testFeatureFlag() {
+           when(unleash.isEnabled("test-feature")).thenReturn(true);
+           assertTrue(controller.checkFeature("test-feature"));
+       }
+   }
+   ```
 
-## 部署检查清单
+2. **Integration Testing**
 
-- [ ] 验证 Unleash 服务器配置
-- [ ] 确认 API 密钥设置
-- [ ] 检查日志级别配置
-- [ ] 测试所有功能开关
-- [ ] 验证错误处理
-- [ ] 确认监控配置
-- [ ] 检查性能影响
+   ```java
+   @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+   class FeatureIntegrationTest {
+       @Autowired
+       private TestRestTemplate restTemplate;
 
-## 常见问题解决
+       @Test
+       void testFeatureEndpoint() {
+           ResponseEntity<Boolean> response = restTemplate
+               .getForEntity("/api/feature/test-feature", Boolean.class);
+           assertEquals(HttpStatus.OK, response.getStatusCode());
+       }
+   }
+   ```
 
-1. **连接问题**
-   - 检查 Unleash 服务器地址
-   - 验证网络连接
-   - 确认 API 密钥正确
+## Monitoring and Metrics
 
-2. **性能问题**
-   - 调整同步间隔
-   - 检查缓存配置
-   - 监控响应时间
+1. **Add Metric Collection**
 
-3. **配置问题**
-   - 检查环境变量
-   - 验证配置文件
-   - 确认日志配置
+   ```java
+   @Bean
+   public UnleashMetricService unleashMetricService(Unleash unleash) {
+       return new UnleashMetricService(unleash);
+   }
+   ```
 
-## 安全考虑
+2. **Custom Metric Handling**
 
-1. **API 密钥管理**
-   - 使用环境变量
-   - 避免硬编码
-   - 定期轮换密钥
+   ```java
+   public class CustomMetricSubscriber implements UnleashSubscriber {
+       @Override
+       public void onCount(String name, boolean enabled) {
+           // Implement metric collection logic
+       }
+   }
+   ```
 
-2. **访问控制**
-   - 实现适当的认证
-   - 限制 API 访问
-   - 监控异常访问
+## Deployment Checklist
 
-3. **数据保护**
-   - 加密敏感数据
-   - 实现审计日志
-   - 控制日志输出
+- [ ] Verify Unleash server configuration
+- [ ] Confirm API key settings
+- [ ] Check logging level configuration
+- [ ] Test all feature toggles
+- [ ] Verify error handling
+- [ ] Confirm monitoring configuration
+- [ ] Check performance impact
+
+## Common Issues
+
+1. **Connection Issues**
+
+   - Check Unleash server address
+   - Verify network connection
+   - Confirm API key is correct
+
+2. **Performance Issues**
+
+   - Adjust synchronization interval
+   - Check cache configuration
+   - Monitor response times
+
+3. **Configuration Issues**
+
+   - Check environment variables
+   - Verify configuration files
+   - Confirm logging configuration
+
+## Security Considerations
+
+1. **API Key Management**
+
+   - Use environment variables
+   - Avoid hardcoding
+   - Rotate keys periodically
+
+2. **Access Control**
+
+   - Implement appropriate authentication
+   - Limit API access
+   - Monitor anomalous access
+
+3. **Data Protection**
+
+   - Encrypt sensitive data
+   - Implement audit logging
+   - Control log output
